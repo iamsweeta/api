@@ -13,6 +13,9 @@ import static io.restassured.RestAssured.given;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class PetsTests extends BaseTest {
+    //В данном тестовом классе содержатся тестовые методы для раздела Pet
+    private final String BASE_URI = "https://petstore.swagger.io/v2";
+    private final int SUCCESS_CODE = 200;
 
     String requestBody = null;
     Integer petId = 15;
@@ -27,10 +30,10 @@ public class PetsTests extends BaseTest {
     // Задаем информацию о новом питомце
     {
         String initialBody = null;
-        try{
+        try {
             initialBody = new String(readFile("src/test/resources/petInformation.json"));
-
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new RuntimeException(e);
         }
         JSONObject jsonObject = new JSONObject(initialBody);
@@ -48,8 +51,8 @@ public class PetsTests extends BaseTest {
                 .basePath("pet")
                 .body(requestBody)
                 .post()
-                .then()
-                .spec(getCreatePetResponse());
+                .then().log().all()
+                .spec(getCreatePetResponse(petId, petCategory, petName));
 
         System.out.println("Новый питомец " + petName + " успешно добавлен в магазин!" + "\n");
     }
@@ -58,24 +61,22 @@ public class PetsTests extends BaseTest {
     @DisplayName("Добавление фото для питомца")
     public void testAddPetPhoto(){
         given()
-                .baseUri("https://petstore.swagger.io/v2")
+                .baseUri(BASE_URI)
                 .basePath("/pet/" + petId + "/uploadImage")
                 .multiPart(imageFile)
                 .post()
-                .then()
+                .then().log().all()
                 .spec(getAddPhotoResponse());
 
         System.out.println("Фотография питомца " + petName + " успешно загружена!" + "\n");
     }
-
-
     @Test
     @DisplayName("Поиск питомца по ID")
     public void testSearchPetById() {
         given(specification)
                 .basePath("/pet/" + petId)
                 .get()
-                .then()
+                .then().log().all()
                 .spec(getPetResponse(petId, petCategory, petName));
         System.out.println("Питомец " + petName + " успешно найден по ID!" + "\n");
 
@@ -89,7 +90,7 @@ public class PetsTests extends BaseTest {
                 .queryParam("status", petsStatus)
                 .get();
 
-        Assertions.assertEquals(200, response.getStatusCode());
+        Assertions.assertEquals(SUCCESS_CODE, response.getStatusCode());
 
         System.out.println("Питомцы успешно найдены по статусу " + petsStatus);
         List<String> soldPetNames = response.jsonPath().getList("name");
@@ -111,7 +112,7 @@ public class PetsTests extends BaseTest {
         .basePath("pet")
         .body(jsonObject.toString())
         .put()
-        .then()
+        .then().log().all()
         .spec(getUpdatedPetResponse(petId, petCategory, newPetName));
         System.out.println("У питомца " + petName + " успешно обновлено имя: " + newPetName);
 
@@ -119,7 +120,7 @@ public class PetsTests extends BaseTest {
         given(specification)
                 .basePath("/pet/" + petId)
                 .get()
-                .then()
+                .then().log().all()
                 .spec(getPetResponse(petId, petCategory, newPetName));
         System.out.println("Питомец успешно найден по ID после обновления!" + "\n");
 
@@ -134,15 +135,15 @@ public class PetsTests extends BaseTest {
                 .formParam("name", newPetName2)
                 .formParam("status", "pending")
                 .post()
-                .then()
-                .spec(getUpdateWithFormResponse(200));
+                .then().log().all()
+                .spec(getUpdateWithFormResponse(SUCCESS_CODE));
         System.out.println("Информация о питомце успешно обновлена с помощью FORM DATA!");
 
         //поиск питомца по ID после обновления с помощью FORM DATA
         given(specification)
                 .basePath("/pet/" + petId)
                 .get()
-                .then()
+                .then().log().all()
                 .spec(getUpdatedPetFormDataResponse(petId, "pending", newPetName2));
         System.out.println("Питомец успешно найден по ID после обновления с помощью FORM DATA!" + "\n");
     }
@@ -153,7 +154,7 @@ public class PetsTests extends BaseTest {
         given(specification)
                 .basePath("/pet/" + petId)
                 .delete()
-                .then()
+                .then().log().all()
                 .spec(getAssertionSpecification());
         System.out.println("Питомец удален" + "\n");
     }

@@ -1,30 +1,33 @@
 import io.restassured.response.Response;
 import org.json.JSONObject;
 import org.junit.Test;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Order;
-
+import org.junit.jupiter.api.*;
 import java.io.IOException;
-import java.time.Instant;
 import java.util.Map;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.TestMethodOrder;
 import static groovyjarjarantlr4.v4.runtime.misc.Utils.readFile;
 import static io.restassured.RestAssured.given;
 
-public class shopTests extends BaseTest{
+@TestMethodOrder(OrderAnnotation.class)
+public class ShopTests extends BaseTest {
+    //В данном тестовом классе содержатся тестовые методы для раздела Shop
     String requestBody = null;
     Integer id = 1;
     Integer petId = 1;
     Integer quantity = 1;
-    Instant shipDate = Instant.parse ( "2024-06-12T20:19:19.384Z" ) ;
+    String shipDate = "2024-06-12T20:19:19.384+0000";
     String status = "placed";
     Boolean complete = true;
+
     {
         String initialBody = null;
-        try{
+        try {
             initialBody = new String(readFile("src/test/resources/order.json"));
 
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new RuntimeException(e);
         }
         JSONObject jsonObject = new JSONObject(initialBody);
@@ -36,7 +39,6 @@ public class shopTests extends BaseTest{
         jsonObject.put("complete", complete);
         requestBody = jsonObject.toString();
     }
-
     @Test
     @DisplayName("Показать количество питомцев по статусу")
     @Order(1)
@@ -65,8 +67,8 @@ public class shopTests extends BaseTest{
                 .basePath("/store/order/")
                 .body(requestBody)
                 .post()
-                .then()
-                .spec(getOrderResponse(id, petId, status, complete));
+                .then().log().all()
+                .spec(getOrderResponse(id, petId, quantity, shipDate, status, complete));
         System.out.println("Заказ успешно оформлен!");
     }
 
@@ -77,8 +79,8 @@ public class shopTests extends BaseTest{
         given(specification)
                 .basePath("/store/order/" + 1)
                 .get()
-                .then()
-                .spec(getOrderResponse(id, petId, status, complete));
+                .then().log().all()
+                .spec(getOrderResponse(id, petId, quantity, shipDate, status, complete));
         System.out.println("Заказ найден!" + "\n");
     }
 
@@ -89,7 +91,7 @@ public class shopTests extends BaseTest{
         given(specification)
                 .basePath("/store/order/" + id)
                 .delete()
-                .then()
+                .then().log().all()
                 .spec(getAssertionSpecification());
         System.out.println("Заказ успешно удален!" + "\n");
     }

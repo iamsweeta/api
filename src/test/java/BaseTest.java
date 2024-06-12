@@ -2,14 +2,13 @@ import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
-
-import java.time.Instant;
-
 import static org.hamcrest.Matchers.*;
 
-public class BasePetTest {
+public class BaseTest {
+    //В данном родительском классе содержится базовая спецификация и спецификации к методам тестовых классов
+    private final String BASE_URI = "https://petstore.swagger.io/v2";
     RequestSpecification specification = new RequestSpecBuilder()
-                .setBaseUri("https://petstore.swagger.io/v2")
+                .setBaseUri(BASE_URI)
                 .addHeader("Accept", "application/json")
                 .addHeader("Content-Type", "application/json;;charset=UTF-8")
                 .addHeader("Accept-Encoding", "gzip, deflate, br")
@@ -85,6 +84,19 @@ public class BasePetTest {
         ResponseSpecBuilder builder = new ResponseSpecBuilder();
         builder.addResponseSpecification(getAssertionSpecification())
                 .expectBody("code", equalTo(code));
+        return builder.build();
+    }
+
+    protected  ResponseSpecification getUsersResponse(int id, String userName, String firstName, String lastName, String email, String password, int userStatus){
+        ResponseSpecBuilder builder = new ResponseSpecBuilder();
+        builder.addResponseSpecification(getAssertionSpecification())
+                .expectBody("id", equalTo(id))
+                .expectBody("username", equalTo(userName))
+                .expectBody("firstName", equalTo(firstName))
+                .expectBody("lastName", equalTo(lastName))
+                .expectBody("email", equalTo(email))
+                .expectBody("password", equalTo(password))
+                .expectBody("userStatus", equalTo(userStatus));
         return builder.build();
     }
 

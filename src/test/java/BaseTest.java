@@ -2,13 +2,12 @@ import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
-import org.junit.Before;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
+
+import java.time.Instant;
 
 import static org.hamcrest.Matchers.*;
 
-public class BaseTest {
+public class BasePetTest {
     RequestSpecification specification = new RequestSpecBuilder()
                 .setBaseUri("https://petstore.swagger.io/v2")
                 .addHeader("Accept", "application/json")
@@ -20,12 +19,12 @@ public class BaseTest {
         builder.expectStatusCode(200);
         return builder.build();
     }
-    protected ResponseSpecification getCreatePetResponse(){
+    protected ResponseSpecification getCreatePetResponse(int id, String categoryName, String name){
         ResponseSpecBuilder builder = new ResponseSpecBuilder();
         builder.addResponseSpecification(getAssertionSpecification())
-                .expectBody("id", equalTo(15))
-                .expectBody("category.name", equalTo("cat"))
-                .expectBody("name", equalTo("Maxik"));
+                .expectBody("id", equalTo(id))
+                .expectBody("category.name", equalTo(categoryName))
+                .expectBody("name", equalTo(name));
         return builder.build();
     }
 
@@ -70,12 +69,14 @@ public class BaseTest {
         return builder.build();
     }
 
-    protected ResponseSpecification getOrderResponse(int id, int petId, String status, boolean complete){
+    protected ResponseSpecification getOrderResponse(int id, int petId, int qantity, String shipDate, String status, boolean complete){
         ResponseSpecBuilder builder = new ResponseSpecBuilder();
         builder.addResponseSpecification(getAssertionSpecification())
                 .expectBody("id", equalTo(id))
-                .expectBody("status", equalTo(status))
                 .expectBody("petId", equalTo(petId))
+                .expectBody("quantity", equalTo(qantity))
+                .expectBody("shipDate", equalTo(shipDate))
+                .expectBody("status", equalTo(status))
                 .expectBody("complete", equalTo(complete));
         return builder.build();
     }
